@@ -1,28 +1,51 @@
+##### 消息系统介绍：
+
+###### # 一个消息系统负责将数据从一个应用传递到另一个应用，应用只需关注于数据，无需关注数据在两个或多个应用间是如何传递的。分布式消息传递基于可靠的消息队列，在客户端应用和消息系统之间异步传递消息。有两种主要的消息传递模式：点对点传递模式、发布-订阅模式。kafka就是一种发布-订阅模式。
+
+
+
 ##### kafka中设计的名词：
 
-###### 1.消息记录：由一个key，一个value和一个时间戳构成，消息最终存储在主题下的分区中，记录在生产中称为生产者记录，在消费者中称为消费记录。kafka集群保持了所有发布的消息，直到他们过期，无论消息是否被消费了，在一个可配置的时间段内，kafka集群保留了所有发布的消息。比如消息的保存策略被设置为2天，那么在一个消息被发布的两天时间内，它都是可以被消费的。kafka的性能是和数据量无关的常量级的，所以保留太多数据并不是问题。
+![image-20191217111654363](/Users/drzhang/Library/Application Support/typora-user-images/image-20191217111654363.png)
 
-###### 2.生产者：生产者用于发布消息
 
-###### 3.消费者：消费者用于订阅消息
 
-###### 4.消费者组：相同的groupID的消费者组，每个消费者都需要设置一个组id，每条消息只能被consumer group中的一个Consumer消费，但是可以被多个consumer group消费。
+##### broker
 
-###### 5.主题（topic）：消息的一种逻辑分组，用于对消息分门别类，每一类消息称之为一个主题，相同主题的消息放在一个队列中
+* kafka集群包含一个或多个服务器，服务器节点成为broker。
+* broker存储topic的数据。如果某topic有N个partiton，集群有N个broker，那么每个broker存储该topic的一个partition。
+* 如果某topic有N个partition，集群有(N+M)个broker，那么其中有N个broker存储该topic的一个partition，剩下的M个broker不存储该topic的partition数据。
+* 如果某topic有N个partition，集群中broker数目少于N个，那么一个broker存储该topic的一个或多个pritition。在实际生产环境中，尽量避免这种情况的发送，这种情况容易导致kafka集群数据不均衡。
 
-######6.分区（partition）：消息的一种物理分组，一个主题被拆成多个分区，没一个分区就是一个顺序的，不可变的消息队列，并且可以持续添加，分区中的每个消息都被分配了一个唯一的id，称之为偏移量（offset），在每个分区中偏移量都是唯一的。每个分区对应一个逻辑log，有多个segment组成。
+##### Topic
 
-###### 7.偏移量：分区中每个消息都有一个唯一的id，称之为偏移量，代表已经消费的位置
+* 每条发布到kafka集群的消息都有一个类别，这个类别被称为topic。（物理上不同topic的消息分开存储，逻辑上一个topic的消息虽然保存于一个或多个broker上，但用户只需指定消息的topic即可生产或消费数据而不必关系数据存于何处）
+* 类似于数据库的表名
 
-###### 8.代理（broker）：一台kafka服务器称之为一个broker
+#####partition
 
-###### 9.副本（replica）：副本只是一个分区（partition）的备份。副本不读取或写入数据。他们用于防止数据丢失
+* topic中的数据分割为一个或多个partition。每个topic至少有一个partition。每个partition中的数据使用多个segment文件存储。
+* partition中的数据是有序的，不同partition间的数据丢失了数据的顺序。如果topic有多个partition，消费数据时就不能保证数据的顺序。在需要严格保证数据的消费顺序的场景下，需要将partition的数目设为1.
 
-###### 10.领导者：leader是负责给定分区的所有读取和写入的节点
+##### producer
 
-###### 11.追随者：跟随领导者指令的节点被称为Follower
+* 生产者即数据的发布者，该角色将消息发布到kafka的topic中。broker接收到生产者发送的消息后，broker将该消息追加到当前用于追加数据的segment文件中。生产者发送的消息，存储到一个partition中，生产者也可以指定数据存储到partition。
 
-###### 12.zookeeper：kafka代理是无状态的，所以它们使用zookeeper来维护它们的集群状态。zookeeper用于管理和协调kafka代理
+##### consumer
+
+* 消费者可以从broker中读取数据。消费者可以消费多个topic中的数据。
+
+##### consumer group
+
+* 每个consumer属于一个特定的consumer group（可为每个consumer指定group name，若不指定group name则属于默认的group）。
+
+##### leader
+
+* 每个partition有多个副本，其中有且仅有一个作为leder，leader是当前负责数据的读写的partition。
+
+##### follower
+
+* follower跟随leader路由，数据变更会广播给所有follower，follower与leader保持同步。如果leader失效，则从follower中选举出一个新的leader。当follower与leader挂掉、卡住或者同步太慢，leader会把这个follower从ISR列表中删除，重新创建一个follower。
 
 
 

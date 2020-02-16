@@ -66,3 +66,23 @@ kafka的应用很广泛，在这里简单介绍几种
 - 消息通讯
 
 消息队列一般都内置了高效的通信机制，因此也可以用在纯的消息通讯中，比如客户端A跟客户端B都使用同一队列进行消息通讯，客户端A，客户端B，客户端N都订阅了同一个主题进行消息发布和接受不了实现类似聊天室效果
+
+
+
+
+
+### kafka执行流程
+
+![image-20200216220039671](/Users/drzhang/Library/Application Support/typora-user-images/image-20200216220039671.png)
+
+1.生产者从kafka集群获取分区leader信息
+
+2.生产者将消息发送给leader
+
+3.leader将消息写入本地磁盘
+
+4.follower从leader拉取消息数据
+
+5.follower将消息写入本地磁盘后向leader发送ACK
+
+6.leader收到所有的follower的ACK之后向生产者发送ACK

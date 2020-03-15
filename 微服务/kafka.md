@@ -71,7 +71,7 @@ kafka的应用很广泛，在这里简单介绍几种
 
 
 
-### kafka执行流程
+##### 生产者往kafka 发送数据的流程（6步）
 
 ![image-20200216220039671](/Users/drzhang/Library/Application Support/typora-user-images/image-20200216220039671.png)
 
@@ -85,4 +85,26 @@ kafka的应用很广泛，在这里简单介绍几种
 
 5.follower将消息写入本地磁盘后向leader发送ACK
 
-6.leader收到所有的follower的ACK之后向生产者发送ACK
+6.leader收到所有的follower的ACK之后向
+
+
+
+
+
+##### kafka选择分区的模式（3种）
+
+1.指定往哪个分区写
+
+2.指定key，kafka根据key做hash然后决定写哪个分区
+
+3.轮询方式
+
+
+
+##### 生产者往kafka发送数据的模式（3种）
+
+1.`0`：把数据发给leader就成功，效率最高、安全性最低。
+
+2.`1`：把数据发给leader，等待leader回复ACK
+
+3.`all`：把数据发给leader，确保follower从leader拉取数据回复ACK给leader，leader再回复ACK

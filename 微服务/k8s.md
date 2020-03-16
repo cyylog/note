@@ -41,3 +41,31 @@
   * 许多资源支持内嵌标签选择器字段
     * matchLabels
     * matchExpressions
+* Service:
+  * 在k8s的世界里，虽然每个Pod都会被分配一个单独的ip地址，但这个ip地址会随着Pod的销毁而消失
+  * Service（服务）就是用来解决这个问题的核心概念
+  * 一个Service可以看作一组提供相同服务的Pod的对外访问接口
+  * Service作用于哪些pod是通过标签选择器来定义的
+* Ingress：
+  * Ingress是k8s集群里工作在OSI网络参考模型下，第7层的应用，对外暴露的接口
+  * Service只能进行L4流量调度，表现形式是ip+port
+  * Ingress则可以调度不同业务域，不同URL访问路径的业务流量
+
+
+
+##### 核心组件：
+* 配置存储中心 -> etcd服务
+* 主控（master）节点
+    *  kube-apiserver服务
+    *  kube-controller-manager服务
+    *  kube-scheduler服务
+* 远算（node）节点
+    *  kube-kubelet服务
+    *  kube-proxy服务
+* CLI客户端
+    * kubectl
+* 核心附件
+    * CNI网络插件 -> flannel/calico
+    * 服务发现用插件 —>coredns
+    * 服务暴露用插件 -> traefik
+    * GUI管理插件 -> Dashboard

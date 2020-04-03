@@ -501,6 +501,39 @@ content-type: application/json; charset=UTF-8
 content-length: 60
 ```
 
+##### Update:
+
+首先新建一个简单的文档：
+
+```json
+curl -X PUT 'http://localhost:9200/test/_doc/1' -H 'Content-Type:application/json' -d'
+{
+    "counter":1,
+    "tags":["red"]
+}'
+```
+
+> 通过脚本增加计数器：
+
+```json
+curl -X POST 'http://localhost:9200/test/_update/1' -H 'Content-Type:application/json' -d'
+{
+    "script":{
+        "source":"ctx._source.counter += parmas.count",
+        "lang":"painless",	//可选，默认painless
+        "params":{
+            "count":4
+        }
+    }
+}'
+```
+
+这时候再查询原来的文档的话，会发现`counter`的值已经变成了5。
+
+
+
+
+
 
 
 ##### 创建新文档:
@@ -579,3 +612,104 @@ curl -X DELETAE 'http://localhost:9200/student/class/3'
 
 *删除文档不会立即从磁盘中删除，只是将文档标记为已删除状态。*
 
+
+
+####es乐观并发控制
+
+> 我们可以使用`_version`号来确保应用中相互冲突的变更不会导致数据丢失。通过指定想要修改的文档`version`来达到这个目的。如果该版本不是当前版本号，请求将会失败。
+
+```json
+curl -X PUT "localhost:9200/website/blog/1?version=2&pretty" -H 'Content-Type: application/json' -d'
+{
+  "title": "My first blog entry",
+  "text":  "Starting to get the hang of this..."
+}
+'
+```
+
+*当指定的更新版本号小于等于当前版本号时，会响应失败，也就是说指定的更新版本号，要大于当前版本号*
+
+```json
+{
+      "error": {
+      "root_cause": [
+         {
+            "type": "version_conflict_engine_exception",
+            "reason": "[blog][1]: version conflict, current [2], provided [1]",
+            "index": "website",
+            "shard": "3"
+         }
+      ],
+      "type": "version_conflict_engine_exception",
+      "reason": "[blog][1]: version conflict, current [2], provided [1]",
+      "index": "website",
+      "shard": "3"
+   },
+   "status": 409
+}
+```
+
+==其实就是es在告诉你，你当前更改的这个版本已经被人改过了。==
+
+
+
+##### 文档的部分更新
+
+```json
+curl -X POST "localhost:9200/website/blog/1/_update?pretty" -H 'Content-Type: application/json' -d'
+{
+   "doc" : {
+      "tags" : [ "testing" ],
+      "views": 0
+   }
+}
+'
+```
+
+如果请求成功：
+
+```json
+{
+    "_index": "website",
+    "_type": "blog",
+    "_id": "1",
+    "_version": 4,
+    "result": "updated",
+    "_shards": {
+        "total": 2,
+        "successful": 1,
+        "failed": 0
+    },
+    "_seq_no": 5,
+    "_primary_term": 1
+}
+```
+
+##### 使用脚本更新部分文档：
+
+脚本可以在 `update` API中用来改变 `_source` 的字段内容， 它在更新脚本中称为 `ctx._source` 。 例如，我们可以使用脚本来增加博客文章中 `views` 的数量：
+
+```json
+curl -X 'localhost:9200/website/blog/1/_update?pretty' -H 'Content-Type:application/json' -d'
+{
+   "script" : "ctx._source.views+=1"
+}'
+```
+
+curl -X GET "localhost:9200/_mget?pretty" -H 'Content-Type: application/json' -d'
+{
+   "docs" : [
+      {
+         "_index" : "website",
+         "_type" :  "blog",
+         "_id" :    2
+      },
+      {
+         "_index" : "website",
+         "_type" :  "pageviews",
+         "_id" :    1,
+         "_source": "views"
+      }
+   ]
+}
+'

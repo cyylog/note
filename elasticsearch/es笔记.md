@@ -71,9 +71,9 @@ curl -X PUT 'http://localhost:9200/student/class/1' -H 'Content-Type:application
 ```json
 curl -X PUT 'localhost:9200/student/class/2?pretty' -H 'Content-Type:application/json' -d '
 {
-"name":"tom",
-"age":18,
-"score":59
+    "name":"tom",
+    "age":18,
+    "score":59
 }
 '
 ```
@@ -513,7 +513,7 @@ curl -X PUT 'http://localhost:9200/test/_doc/1' -H 'Content-Type:application/jso
 }'
 ```
 
-> 通过脚本增加计数器：
+######通过脚本增加计数器：
 
 ```json
 curl -X POST 'http://localhost:9200/test/_update/1' -H 'Content-Type:application/json' -d'
@@ -529,6 +529,88 @@ curl -X POST 'http://localhost:9200/test/_update/1' -H 'Content-Type:application
 ```
 
 这时候再查询原来的文档的话，会发现`counter`的值已经变成了5。
+
+###### 向数组里添加数据：
+
+```json
+curl -X POST 'http://localhost:9200/test/_update/1' -H "Content-Type:application/json" -d'
+{
+    "script":{
+        "source":"ctx._source.tags.add(params.tag)",
+        "lang":"painless",
+        "params":{
+            "tag":"blue"
+        }
+    }
+}'
+```
+
+###### 从数组中删除数据：
+
+```json
+curl -X POST 'http://localhost:9200/test/_doc/1?pretty' -H 'Content-Type:application/json' -d'
+{
+    "script":{
+        "source":"if(ctx._source.tags.contains(params.tag)) {ctx._source.tags.remove(ctx._source.tags.indexOf(params.tag))}",
+        "lang":"painless",
+        "params":{
+            "tag":"blue"
+        }
+    }
+}'
+```
+
+*想要删除数组中的某个元素时，要先获取这个元素在数组中对应的index。*
+
+*如果数组中包含重复的要删除的元素，该脚本只会删除其中的一个。*
+
+######新增字段：
+
+```json
+curl -X POST "localhost:9200/test/_update/1?pretty" -H 'Content-Type: application/json' -d'
+{
+    "script" : "ctx._source.new_field = 'value_of_new_field'"
+}
+'
+
+```
+
+该脚本会在原来的文档中新增一条字段，字段名称为`new_filed`，值为`value_of_new_field`
+
+###### 通过脚本删除文档：
+
+```json
+curl -X POST 'http://localhost:9200/test/_doc/1?pretty' -H -d'
+{
+    "script":{
+        "source":"if(ctx._source.tags.contains(params.tag)) {ctx.op='delete'} else {ctx.op='none'}"
+    },
+    "lang":"painless",
+    "params":{
+        "tag":"green"
+    }
+}'
+```
+
+> 如果/test/_doc/1这个文档里的tags数组里有green值，就会删除该文档，否则就返回`noop`(表示不做任何事情)
+
+
+
+###### 向文档新增字段：
+
+```json
+curl -X POST "localhost:9200/test/_update/1?pretty" -H 'Content-Type: application/json' -d'
+{
+    "doc" : {
+        "name" : "new_name"
+    }
+}
+'
+```
+
+该命令会在原来的文档中新增一条字段，字段名称为`name`，值为`new_name`
+
+==如果同时指定了`doc`和`script`，`doc`将被忽略。==
 
 
 
@@ -653,63 +735,7 @@ curl -X PUT "localhost:9200/website/blog/1?version=2&pretty" -H 'Content-Type: a
 
 
 
-##### 文档的部分更新
 
-```json
-curl -X POST "localhost:9200/website/blog/1/_update?pretty" -H 'Content-Type: application/json' -d'
-{
-   "doc" : {
-      "tags" : [ "testing" ],
-      "views": 0
-   }
-}
-'
-```
 
-如果请求成功：
 
-```json
-{
-    "_index": "website",
-    "_type": "blog",
-    "_id": "1",
-    "_version": 4,
-    "result": "updated",
-    "_shards": {
-        "total": 2,
-        "successful": 1,
-        "failed": 0
-    },
-    "_seq_no": 5,
-    "_primary_term": 1
-}
-```
 
-##### 使用脚本更新部分文档：
-
-脚本可以在 `update` API中用来改变 `_source` 的字段内容， 它在更新脚本中称为 `ctx._source` 。 例如，我们可以使用脚本来增加博客文章中 `views` 的数量：
-
-```json
-curl -X 'localhost:9200/website/blog/1/_update?pretty' -H 'Content-Type:application/json' -d'
-{
-   "script" : "ctx._source.views+=1"
-}'
-```
-
-curl -X GET "localhost:9200/_mget?pretty" -H 'Content-Type: application/json' -d'
-{
-   "docs" : [
-      {
-         "_index" : "website",
-         "_type" :  "blog",
-         "_id" :    2
-      },
-      {
-         "_index" : "website",
-         "_type" :  "pageviews",
-         "_id" :    1,
-         "_source": "views"
-      }
-   ]
-}
-'

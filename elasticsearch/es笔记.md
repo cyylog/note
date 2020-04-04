@@ -614,6 +614,54 @@ curl -X POST "localhost:9200/test/_update/1?pretty" -H 'Content-Type: applicatio
 
 
 
+###### upsert:(更新或插入)
+
+> 如果文档不存在，`upsert`元素的内容将作为新文档插入。
+
+```json
+curl -X POST "localhost:9200/test/_update/1?pretty" -H 'Content-Type: application/json' -d'
+{
+    "script" : {
+        "source": "ctx._source.counter += params.count",
+        "lang": "painless",
+        "params" : {
+            "count" : 4
+        }
+    },
+    "upsert" : {
+        "counter" : 1
+    }
+}
+'
+```
+
+###### Scripted upsert:(通过脚本更新或插入)
+
+> 要在文档是否存在的情况下运行脚本，请将脚本化的`upsert`设置为true
+
+```json
+curl -X POST "localhost:9200/sessions/_update/dh3sgudg8gsrgl?pretty" -H 'Content-Type: application/json' -d'
+{
+    "scripted_upsert":true,
+    "script" : {
+        "id": "my_web_session_summariser",
+        "params" : {
+            "pageViewEvent" : {
+                "url":"foo.com/bar",
+                "response":404,
+                "time":"2014-01-01 12:32"
+            }
+        }
+    },
+    "upsert" : {}
+}
+'
+```
+
+
+
+
+
 
 
 

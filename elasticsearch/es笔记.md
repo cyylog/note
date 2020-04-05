@@ -197,53 +197,6 @@ curl -x GET 'http://localhost:9200/student/class/_search?q=name:jerry'
 
 
 
-###### 匹配查询，也称match查询：
-
-```json
-请求示例：
-curl -X GET "localhost:9200/student/class/_search" -H 'Content-Type: application/json' -d'
-{
-    "query" : {
-        "match" : {
-            "age" : 23
-        }
-    }
-}
-'
-
-返回示例：
-{
-    "took": 1,
-    "timed_out": false,
-    "_shards": {
-        "total": 1,
-        "successful": 1,
-        "skipped": 0,
-        "failed": 0
-    },
-    "hits": {
-        "total": {
-            "value": 1,
-            "relation": "eq"
-        },
-        "max_score": 1,
-        "hits": [
-            {
-                "_index": "student",
-                "_type": "class",
-                "_id": "2",
-                "_score": 1,
-                "_source": {
-                    "name": "tom",
-                    "age": 23,
-                    "score": 10
-                }
-            }
-        ]
-    }
-}
-```
-
 
 
 ###### 过滤条件搜索
@@ -396,6 +349,71 @@ curl -X GET 'http://localhost:9200/megacorp/employee/_search' -H 'Content-Type:a
 
 
 
+######匹配查询，也称match查询：
+
+```json
+请求示例：
+curl -X GET "localhost:9200/student/class/_search" -H 'Content-Type: application/json' -d'
+{
+    "query" : {
+        "match" : {
+            "age" : 23
+        }
+    }
+}
+'
+
+返回示例：
+{
+    "took": 1,
+    "timed_out": false,
+    "_shards": {
+        "total": 1,
+        "successful": 1,
+        "skipped": 0,
+        "failed": 0
+    },
+    "hits": {
+        "total": {
+            "value": 1,
+            "relation": "eq"
+        },
+        "max_score": 1,
+        "hits": [
+            {
+                "_index": "student",
+                "_type": "class",
+                "_id": "2",
+                "_score": 1,
+                "_source": {
+                    "name": "tom",
+                    "age": 23,
+                    "score": 10
+                }
+            }
+        ]
+    }
+}
+```
+
+> 1. match查询会hui先对搜索词进行分词，分词完毕后再对分词的结果集进行匹配。==term是单词精确搜索，match是分词匹配搜索。==
+> 2. match搜索可以按照anzhao分词后的分词集合的or或者huozheand进行匹配，==默认为or==，也是为什么默认只要有一个分词出现在文档中就会被搜索出来，同样的，如果我们希望是所有分词都要出现，那只要把匹配模式改成and就行了
+>
+> ```json
+> {
+>   "query": {
+>     "match": {
+>       "tags": {
+>         "query": "Hello World",
+>         "operator": "and"
+>       }
+>     }
+>   }
+> } 
+> ```
+
+
+
 ###### 词项查询，也称term查询:
 
 ```json
@@ -442,9 +460,14 @@ curl -X GET 'localhost:9200/student/_search' -H 'Content-Type:application/json' 
 }
 ```
 
+==term代表完全匹配，也是精确查询，搜索钱不会再对搜索词进行分词fenci，所以搜索词必须是`文档分词集合中的一个`==
+
+1. 如果建立索引时，该字段无分词，那么term完全匹配搜索到的字段
+2. 如果建立索引时，该字段进行了分词，比如`hello world`这个因为是两个单词，所以就进行了分词，搜索时只能搜索`hello`或者`world`，不能直接搜索`hello world`
 
 
-###### 获取头部信息
+
+###### 获取头部信息（-i）：
 
 ```json
 请求示例：
@@ -476,7 +499,7 @@ content-length: 216
 
 
 
-###### 返回文档的一部分
+###### 返回文档的一部分：
 
 > 默认情况下，`GET`请求会返回整个文档，如果只对其中定义的字段感兴趣，可以使用`_source`参数，多个字段可以使用逗号进行分隔
 
@@ -517,7 +540,7 @@ curl -X GET 'http:/localhost:9200/student/class/1/_source'
 
 
 
-###### 检查文档是否存在
+###### 检查文档是否存在（-XHEAD）：
 
 > 如果只想检查一个文档是否存在--根本不想关心内容—那么用`HEAD`方法来代替`GET`方法。
 

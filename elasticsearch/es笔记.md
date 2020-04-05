@@ -197,7 +197,7 @@ curl -x GET 'http://localhost:9200/student/class/_search?q=name:jerry'
 
 
 
-###### 使用查询表达式搜索：
+###### 匹配查询，也称match查询：
 
 ```json
 请求示例：
@@ -396,6 +396,54 @@ curl -X GET 'http://localhost:9200/megacorp/employee/_search' -H 'Content-Type:a
 
 
 
+###### 词项查询，也称term查询:
+
+```json
+curl -X GET 'localhost:9200/student/_search' -H 'Content-Type:application/json' -d'
+{
+	"query":{
+		"term":{
+			"name":"tom"		//这里是指定搜索name为tom 的值
+		}
+	}
+}'
+```
+
+```json
+{
+    "took": 2,
+    "timed_out": false,
+    "_shards": {
+        "total": 1,
+        "successful": 1,
+        "skipped": 0,
+        "failed": 0
+    },
+    "hits": {
+        "total": {
+            "value": 1,
+            "relation": "eq"
+        },
+        "max_score": 0.9808292,
+        "hits": [
+            {
+                "_index": "student",
+                "_type": "class",
+                "_id": "2",
+                "_score": 0.9808292,
+                "_source": {
+                    "name": "tom",
+                    "age": 18,
+                    "score": 59
+                }
+            }
+        ]
+    }
+}
+```
+
+
+
 ###### 获取头部信息
 
 ```json
@@ -469,8 +517,6 @@ curl -X GET 'http:/localhost:9200/student/class/1/_source'
 
 
 
-
-
 ###### 检查文档是否存在
 
 > 如果只想检查一个文档是否存在--根本不想关心内容—那么用`HEAD`方法来代替`GET`方法。
@@ -500,6 +546,10 @@ Warning: 299 Elasticsearch-7.3.0-de777fa "[types removal] Specifying types in do
 content-type: application/json; charset=UTF-8
 content-length: 60
 ```
+
+
+
+
 
 ##### Update:
 
@@ -741,6 +791,30 @@ curl -X DELETAE 'http://localhost:9200/student/class/3'
 ```
 
 *删除文档不会立即从磁盘中删除，只是将文档标记为已删除状态。*
+
+
+
+
+
+##### 批量操作`_bulk`：
+
+###### 批量导入:
+
+```json
+curl -X POST "localhost:9200/_bulk?pretty" -H 'Content-Type: application/json' -d'
+{ "index" : { "_index" : "test", "_id" : "1" } }
+{ "field1" : "value1" }
+{ "delete" : { "_index" : "test", "_id" : "2" } }
+{ "create" : { "_index" : "test", "_id" : "3" } }
+{ "field1" : "value3" }
+{ "update" : {"_id" : "1", "_index" : "test"} }
+{ "doc" : {"field2" : "value2"} }
+'
+```
+
+*批量操作，包含索引、删除、更新、新增*
+
+
 
 
 

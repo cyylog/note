@@ -12,7 +12,7 @@
 
 ##### broker(一台kafka服务器称为一个broker)
 
-* kafka集群包含一个或多个服务器，服务器节点成为broker。
+* kafka集群包含一个或多个服务器，服务器节点称为broker。
 * broker存储topic的数据。如果某topic有N个partiton，集群有N个broker，那么每个broker存储该topic的一个partition。
 * 如果某topic有N个partition，集群有(N+M)个broker，那么其中有N个broker存储该topic的一个partition，剩下的M个broker不存储该topic的partition数据。
 * 如果某topic有N个partition，集群中broker数目少于N个，那么一个broker存储该topic的一个或多个pritition。在实际生产环境中，尽量避免这种情况的发送，这种情况容易导致kafka集群数据不均衡。

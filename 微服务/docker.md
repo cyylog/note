@@ -31,6 +31,14 @@ docker container kill 649a6b785a86 #杀死某个容器
 
 
 
+#### docker inspect mysql
+
+> docker 查看mysql的镜像的ip地址：
+>
+> IPAddress就是mysql的ip地址：
+>
+> `"IPAddress":"172.17.0.3"`
+
 
 
 

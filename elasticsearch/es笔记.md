@@ -882,5 +882,71 @@ curl -X PUT "localhost:9200/website/blog/1?version=2&pretty" -H 'Content-Type: a
 
 
 
+#### Mapping
+
+##### 什么是映射
+
+>  类似于数据库中的表结构定义，主要作用如下：
+>
+> * 定义Index下字段名(Field Name)
+> * 定义字段的类型，比如数值型，字符串型、布尔型等
+> * 定义倒排索引的相关配置，比如是否索引、记录postion等
+>
+> 需要注意的是，在索引中定义太多字段可能会导致索引膨胀，出现内存不足和难以恢复的情况，下面有几个设置：
+>
+> - index.mapping.total_fields.limit：一个索引中能定义的字段的最大数量，默认是 1000
+> - index.mapping.depth.limit：字段的最大深度，以内部对象的数量来计算，默认是20
+> - index.mapping.nested_fields.limit：索引中嵌套字段的最大数量，默认是50
+
+##### Mapping的数据类型
+
+> 基本数据类型
+
+| 属性名字   | 说明                                                         |
+| :--------- | ------------------------------------------------------------ |
+| text       | 用于全文索引，该类型的字段将通过分词器进行分词，最终用于构建索引 |
+| keyword    | 不分词                                                       |
+| long       | 有符号64-bit integer: -2^63 ~ 2^63-1                         |
+| integer    | 有符号32-bit integer：-2^31 ~ 2^31-1                         |
+| short      | 有符号16-bit integer：-32768 ~ 32767                         |
+| byte       | 有符号8-bit integer：-128 ~ 127                              |
+| double     | 64-bit IEEE 754 浮点数                                       |
+| float      | 32-bit IEEE 754 浮点数                                       |
+| half_float | 16-bit IEEE 754 浮点数                                       |
+| boolean    | true,false                                                   |
+| date       |                                                              |
+| binary     | 该类型的字段把值当做经过 base64 编码的字符串，默认不存储，且不可搜索 |
+
+> Mapping范围数据类型
+
+| 支持的数据类型 | 说明                                    |
+| -------------- | --------------------------------------- |
+| integer_range  |                                         |
+| float_range    |                                         |
+| long_range     |                                         |
+| double_range   |                                         |
+| date_range     | 64-bit 无符号整数，时间戳（单位：毫秒） |
+| ip_range       | IPV4 或 IPV6 格式的字符串               |
+
+可选参数:
+
+relation这只匹配模式
+
+INTERSECTS 默认的匹配模式，只要搜索值与字段值有交集即可匹配到
+
+WITHIN 字段值需要完全包含在搜索值之内，也就是字段值是搜索值的子集才搜索出来
+
+CONTAINS 与WITHIN相反，只搜索字段值包含搜索值的文档
+
+
+
+
+
+
+
+
+
+change master to master_host='172.17.0.3', master_user='root', master_password='root', master_port=3306, master_log_file='mysql-bin.000003', master_log_pos=619, master_connect_retry=30;
+
 
 

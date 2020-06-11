@@ -57,3 +57,19 @@
 * 设置定长消息，每次读取定长内容，长度不够时空位补固定字符。
 * 设置消息边界，服务端从网络流中按消息边界分离出消息内容，一般是用'\n'
 
+```yaml
+version: "3"
+services:
+	db:
+		image: postgres
+	web:
+		build: .
+		command: python manage.py runserver 0.0.0.0:8000
+		volumes:
+			- .:/code
+		ports:
+			- "8000:8000"
+		links:
+			- db
+```
+

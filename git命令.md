@@ -10,5 +10,9 @@
 
 ##### 删除本地缓存，提交忽略的文件
 git rm -r --cached .
+
 git add .
-git commit -m ‘update .gitignore’
+
+git commit -m 'update .gitignore'
+
+git push

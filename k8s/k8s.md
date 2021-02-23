@@ -1,6 +1,6 @@
 [TOC]
 
-##### k8s概念：
+#### k8s概念：
 
 ​	在kubernetes集群中，有master和node两个角色。
 
@@ -8,6 +8,67 @@
 Master主要负责整个集群的管理控制。
 Node负责集群中的各个工作节点。Node由Master管理，提供运行容器所需的各种环境，对容器进行实际的控制，而这些容器会提供实际得到应用服务。
 ```
+
+![image-20210223154420850](image-20210223154420850.png)
+
+##### Master
+**Master的组成**
+
+![image-20210223155030921](image-20210223155030921.png)
+> 注意：图里的ectd应该为etcd
+
+###### 1.API Server进程
+
+```json
+API Server(kube-apiserver)进程为kubernetes中各类资源对象提供了增删改查等HTTP REST接口。
+```
+
+###### 2.etcd
+```json
+etcd是一种轻量级的分布式键值存储。只有API Server进程才能直接访问和操作etcd。
+```
+
+###### 3.调度器（kube-scheduler）
+```json
+调度器（kube-scheduler）是Pod资源的调度器。它用于监听最近创建但还未分配 Node 的 Pod资源，会为 Pod自动分配相应的 Node。
+调度器所执行的各项操作均是基于API Server进程的。如调度器会通过API Server进程的Watch接口监听新建的Pod，并搜索所有满足 Pod需求的Node列表，再执行Pod调度逻辑。调度成功后会将Pod绑定到目标Node上。
+```
+
+###### 4.控制器（kube-controller-manager）
+```json
+kubernetes集群的大部分功能是由控制器执行的。
+* Node控制器：负责在Node出现故障时做出响应。
+* Replication控制器：负责对系统中的每个ReplicationController对象维护正确数量的Pod。
+* Endpoint控制器：负责生成和维护所有Endpoint对象的控制器。Endpoint控制器用于监听Service和对应的Pod副本的变化。
+* ServiceAccount及Token控制器：为新的命名空间创建默认账户和API访问令牌。
+kube-controller-manager所执行的各项操作也是基于API Server进程的。
+```
+
+
+#### Node
+**Node的组成**
+
+![image-20210223161854035](image-20210223161854035.png)
+
+> Node由3个部分组成，分别是kubelet、kube-proxy和容器运行时(container runtime)。
+
+###### 1.kubelet
+```json
+kubelet 是在每个Node上都运行的主要代理进程。kubelet以PodSpec为单位来运行任务，PodSpec是一种描述Pod的YAML或JSON对象。kubelet会运行各种机制提供（主要通过API Server）的一系列PodSpec，并确保这些PodSpec中描述的容器健康运行。kubelet负责维护容器的生命周期，同时也负责存储卷（volume）等资源的管理。
+
+每个Node上的kubelet会定期调用Master节点上API Server进程的REST接口，报告自身状态。API Server进程接受这些信息后，会将Node的状态信息更新到etcd中。kubelet也通过API Server进程的Watch接口监听Pod信息，从而对Node上的Pod进行管理。
+```
+
+###### 2.kube-proxy
+```json
+kube-proxy主要用于管理Service的访问入口，包括集群内的其他Pod到Service的访问，以及从集群外访问Service。
+```
+
+###### 3.容器运行时
+```json
+容器运行时是负责运行容器的软件。
+```
+
 
 
 

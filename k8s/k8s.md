@@ -71,6 +71,25 @@ kube-proxy主要用于管理Service的访问入口，包括集群内的其他Pod
 
 
 
+##### Pod创建流程
+
+![image-20210223170227292](image-20210223170227292.png)
+
+具体发生的事情如下：
+```json
+（1）kubectl命令将转换为对API Server的调用。
+（2）API Server验证请求并将其保存到etcd中。
+（3）etcd通知API Server。
+（4）API Server调用调度器。
+（5）调度器决定在哪个节点运行Pod，并将其返回给API Server。
+（6）API Server将对应节点保存到etcd中。
+（7）etcd通知API Server。
+（8）API Server在相应的节点中调用kubelet。
+（9）kubelet与容器运行时API发送交互，与容器守护进程通信以创建容器。
+（10）kubelet将Pod状态更新到API Server中。
+（11）API Server把最新的状态保存到etcd中。
+```
+
 
 
 

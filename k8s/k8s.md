@@ -90,6 +90,64 @@ kube-proxy主要用于管理Service的访问入口，包括集群内的其他Pod
 （11）API Server把最新的状态保存到etcd中。
 ```
 
+###### 
+
+###### kubernetes的基本对象模型
+
+![image-20210223172620653](image-20210223172620653.png)
+
+#### kubernetes主要的资源对象
+##### Pod
+```json
+Pod是kubernetes处理的最基本单元。容器本身并不会直接分配到主机上，而是会封装到名为Pod的对象中。
+
+Pod通常表示单个应用程序，由一个或多个关系紧密的容器构成，这些容器拥有同样的生命周期，作为一个整体一起编排到Node上。这些容器共享环境、存储卷和IP空间。尽管Pod基于一个或多个容器，但应将Pod视为单一的整体、单独的应用程序。kubernetes以Pod为最小单元进行调度、伸缩并共享资源、管理生命周期。
+
+一般来说，用户不应自行管理Pod，因为Pod并没有提供应用程序通常会用到的一些特性，如复杂的生命周期管理及动态伸缩。建议用户使用将Pod或Pod模板作为基本组件的更高级别对象，这些对象会拥有更多的特性。
+```
+
+![image-20210223174425465](image-20210223174425465.png)
+
+> Pod容器的构成
+
+##### 控制器
+
+> 一般来说，用户不会直接创建Pod，而是创建控制器，让控制器来管理Pod。
+
+
+
+1. RelicationController和RelicaSet控制器
+```json
+ReplicationController可以定义Pod模板，并可以设置相应控制参数以实现水平伸缩，以调节正在运行的相同的Pod数。ReplicationController能根据需要自动创建新的Pod。
+ReplicationController负责保证在集群中部署的Pod数量与配置中的Pod数量一致。如果Pod或主机出现故障，ReplicationController会自动启动新的Pod进行补充。如果ReplicationController配置中的副本数量发生改变，则会启动或终止一些Pod来匹配设定好的数量。ReplicationController还可以执行滚动更新，将一组Pod逐个切换到最新版本，从而最大限度减少对应用程序可用性的影响。
+
+ReplicaSet控制器可以看作ReplicationController的另一个版本，其Pod识别功能使它在Pod管理上更具灵活性。由于ReplicaSet控制器具有副本筛选功能，因此ReplicaSet控制器才有逐渐取代ReplicationController的趋势，但ReplicaSet控制器无法实现滚动更新，无法像ReplicationController那样在后端轮流切换到最新版本。
+
+与Pod一样，ReplicationController和ReplicaSet控制器都是很少直接使用的对象。虽然它们都是基于Pod而设计的，增加了水平伸缩功能，提高了可靠性，但它们缺少一些在其他复杂对象中具有的更细粒度的生命周期管理功能。
+
+```
+
+
+2. Deployment控制器
+```json
+Deployment控制器可能是最常用的工作负载对象之一。Deployment控制器以ReplicaSet控制器为基础，是更高级的概念，增加了更灵活的生命周期管理功能。
+
+Deployment控制器是一种高级对象，旨在简化Pod的生命周期管理。只要简单更改Deployment控制器的配置文件，Kubernetes就会自动调节ReplicaSet控制器，管理应用程序不同版本之间的切换，还能实现自动维护事件历史记录及自动撤销功能。
+```
+
+![image-20210223200947359](image-20210223200947359.png)
+
+
+3. StatefulSet控制器
+```json
+StatefulSet控制器是一种提供了排序和唯一性保证的特殊Pod控制器。
+```
+
+4. DaemonSet控制器
+5. Job控制器和CronJob控制器
+
+
+
 
 
 

@@ -1,6 +1,21 @@
 [toc]
 
+#### linux权限设置
+|权限符号|权限意思|
+|--|--|
+|r|可读|
+|w|可写|
+|x|可执行|
+```json
+chmod u=rwx,g=rx,o=r test.sh
 
+u指user，g指group，o指other
+
+
+chmod a+w test.sh		--所有用户增加write权限
+
+chmod a-x test.sh		--所有用户去除执行权限
+```
 
 
 

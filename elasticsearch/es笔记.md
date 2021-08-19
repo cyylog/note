@@ -1,22 +1,199 @@
 [TOC]
 
-####es里基础概念：
+#### es里基础概念：
 
 ###### _index（索引）：文档在哪存放
 
 > 实际上，在elasticsearch中，我们的数据是被存储和索引在分片中，而一个索引仅仅是逻辑上的命名空间，这个命名空间由一个或多个分片组合在一起。
 >
-> ==索引名必须小写，不能以下划线开头，不能包含逗号==
+> *索引名必须小写，不能以下划线开头，不能包含逗号*
 
-######_type（类型）：文档表示的对象类别
+```shell
+/_search										在所有的索引中搜索所有的类型
+/gb/_search									在gb索引中搜索所有类型
+/gb,us/_search							在gb和us索引中搜索所有的文档
+/g*,u*/_search							在任何以g或者u开头的索引中搜索所有的类型
+/gb/user/_search						在gb索引中搜索user类型
+/gb,us/user,tweet/_search		在gb和us索引中搜索user和tweet类型的文档
+/_all/user,tweet/_search		在所有索引中搜索user和tweet类型的文档
+```
 
-> ==一个_type命名可以是大写或者小写，但是不能以下划线或者句号开头，不能包含逗号，并且长度限制为256个字符==
+###### _type（类型）：文档表示的对象类别
 
-######_id（id）：文档唯一标识
+> *一个_type命名可以是大写或者小写，但是不能以下划线或者句号开头，不能包含逗号，并且长度限制为256个字符*
+
+###### _id（id）：文档唯一标识
 
 > *ID* 是一个字符串，当它和 `_index` 以及 `_type` 组合就可以唯一确定 Elasticsearch 中的一个文档。 当你创建一个新的文档，要么提供自己的 `_id` ，要么让 Elasticsearch 帮你生成。
 >
-> ==当你使用指定的id时，请求方式使用`PUT`方式，当没有指定id时，要使用`POST`方式，这时elasticsearch会自动生成`_id`，自动生成的 ID 是 URL-safe、 基于 Base64 编码且长度为20个字符的 GUID 字符串。==
+> *当你使用指定的id时，请求方式使用`PUT`方式，当没有指定id时，要使用`POST`方式，这时elasticsearch会自动生成`_id`，自动生成的 ID 是 URL-safe、 基于 Base64 编码且长度为20个字符的 GUID 字符串。*
+
+##### 分页：
+
+###### size
+
+显示应该返回的结果数量，默认是*10*
+
+###### from
+
+显示应该跳过的初始结果数量，默认是10
+
+```json
+GET /_search?size=5
+GET /_search?size=5&from=10
+```
+
+##### 查询全部
+
+```json
+GET /_search?q=bob		//查询所有包含bob的文档
+```
+
+##### math单字段查询
+
+```json
+GET /test/_search
+{
+  "query": {
+    "match": {
+      "age": 25	//这里是要从哪个字段，和查询的值是什么，相当于mysql里 select * from table where name=25
+    }
+  }
+}
+
+```
+
+##### multi_match多字段查询
+
+```json
+GET /test/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "jerry",									//query字段表示要查找的值
+      "fields": ["abort","last_name"]		//fields表示要从哪些字段中找到这些值
+    }
+  }
+}
+
+
+```
+
+##### range查询
+
+```json
+GET /test/_search
+{
+  "query": {
+    "range": {
+      "age": {
+        "gte": 20,
+        "lte": 35
+      }
+    }
+  }
+}
+
+被允许的操作符如下：
+gt：大于
+gte：大于等于
+lt：小于
+lte：小于等于
+```
+
+##### term精准查询
+
+```json
+GET /test/_search
+{
+  "query": {
+    "term": {
+      "abort": {
+        "value": "he"
+      }
+    }
+  }
+}    
+注：这里value匹配的是abort字段里包含 he 的值，term一次只能加一个查询条件
+```
+
+##### terms查询
+
+```json
+GET /test/_search
+{
+  "query": {
+    "terms": {
+      "last_name": [
+        "bob",
+        "jerry"
+      ]
+    }
+  }
+}
+注：这里terms查询的是一个字段包含的多个值
+```
+
+##### exists查询
+
+```json
+GET /test/_search
+{
+  "query": {
+    "exists": {
+      "field": "last_name"
+    }
+  }
+}
+注：这里是查询是否包含 last_name 这个字段
+```
+
+##### match查询中提高精度查询
+
+```json
+GET /my_index/my_type/_search
+{
+  "query": {
+    "match": {
+      "title":  "brown dog"		//这样查询是只要包含brown或者dog的数据列都会被查询出来
+    }
+  }
+}
+
+GET /my_index/my_type/_search
+{
+  "query": {
+    "match": {
+      "title": {
+        "query": "brown dog",		//这样查询时相当于and查询，必须都包含query条件才会查询出来
+        "operator": "and"
+      }
+    }
+  }
+}
+```
+
+##### multi_match多匹配查询
+
+```json
+GET /_search
+{
+  "query": {
+    "multi_match": {
+      "query": "Quick brown fox",
+      "fields": ["title","body"]   // 查询title和body字段中包含query里的值的数据
+      
+      ---
+      "query": "Quick brown fox",
+      "fields": "*_title" 		// 字段模糊查询
+    }
+  }
+}
+
+
+```
+
+
 
 
 
@@ -58,7 +235,7 @@ curl -X PUT 'http://localhost:9200/student/class/1' -H 'Content-Type:application
 | student | class | 1      |
 | 索引    | 类型  | 文档id |
 
-==对同一个/_index/_tpye/_id进行PUT操作时，首次PUT是新增操作，后面的PUT操作时update操作==
+*对同一个/_index/_tpye/_id进行PUT操作时，首次PUT是新增操作，后面的PUT操作时update操作*
 
 
 
@@ -151,7 +328,7 @@ curl -X GET 'http://localhost:9200/student/class/_search'
 }
 ```
 
-==GET查询时，如果不指定文档id，使用_search查询，表示查询该索引类型下所有的文档==
+*GET查询时，如果不指定文档id，使用_search查询，表示查询该索引类型下所有的文档*
 
 
 
@@ -224,7 +401,7 @@ curl -X GET 'http://localhost:9200/student/class/_search' -H 'Content-Type:appli
 '
 ```
 
-==这里使用了过滤器，去查找年龄大于25岁的文档，其中 *gt*表示大于==
+*这里使用了过滤器，去查找年龄大于25岁的文档，其中 *gt*表示大于*
 
 
 
@@ -944,7 +1121,58 @@ CONTAINS 与WITHIN相反，只搜索字段值包含搜索值的文档
 
 
 
-change master to master_host='172.17.0.3', master_user='root', master_password='root', master_port=3306, master_log_file='mysql-bin.000003', master_log_pos=619, master_connect_retry=30;
+```json
+{
+    "query":{
+        "bool":{
+            "must":[
+                {
+                    "term":{
+                        "kubernetes.namespace.keyword":"junhui-dsp"
+                    }
+                },
+                {
+                    "term":{
+                        "kubernetes.pod.name.keyword":"mynginx-ff4dc7896-mv4g4"
+                    }
+                },
+                {
+                    "terms":{
+                        "kubernetes.container.name.keyword":[
+                            "mynginx"
+                        ]
+                    }
+                },
+                {
+                    "range":{
+                        "@timestamp":{
+                            "from":"1628697600000",
+                            "include_lower":true,
+                            "include_upper":true,
+                            "to":"1629278695726"
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    "size":100,
+    "sort":[
+        {
+            "@timestamp":{
+                "order":"desc"
+            }
+        },
+        {
+            "_id":{
+                "order":"desc"
+            }
+        }
+    ]
+}
+```
+
+
 
 
 

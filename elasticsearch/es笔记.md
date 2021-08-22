@@ -1119,6 +1119,143 @@ CONTAINS 与WITHIN相反，只搜索字段值包含搜索值的文档
 
 
 
+kubernetes类型：
+
+```json
+"kubernetes.namespace.keyword":"junhui-dsp"
+"kubernetes.pod.name.keyword":"mynginx-ff4dc7896-mv4g4"
+单pod
+"kubernetes.container.name.keyword":["mynginx"]
+多pod
+kubernetes.pod.name.keyword
+
+rang：
+from、to
+
+sort:
+timestamp、_id
+```
+
+ocp类型：
+
+```json
+{
+    "took": 30,
+    "timed_out": false,
+    "_shards": {
+        "total": 5,
+        "successful": 5,
+        "skipped": 0,
+        "failed": 0
+    },
+    "hits": {
+        "total": 1,
+        "max_score": null,
+        "hits": [
+            {
+                "_index": "containers-2021.08.18",
+                "_type": "doc",
+                "_id": "zqvvWHsBJD6vSnutUBVC",
+                "_score": null,
+                "_source": {
+                    "stream": "stdout",
+                    "agent": {
+                        "id": "267f5ccd-78d1-4c8e-a570-e33f8bc694fa",
+                        "hostname": "filebeat-nrt2r",
+                        "name": "filebeat-nrt2r",
+                        "ephemeral_id": "e5f9c334-7a82-4b54-8a1e-df97dfc172d2",
+                        "version": "7.13.0",
+                        "type": "filebeat"
+                    },
+                    "tags": [
+                        "container",
+                        "beats_input_codec_plain_applied"
+                    ],
+                    "ecs": {
+                        "version": "1.8.0"
+                    },
+                    "container": {
+                        "id": "44d9fc52c6ab7cdc80fab74d3cf5b183fc050ff2d283a6ad7b6fe8c000bcc9f6",
+                        "image": {
+                            "name": "10.23.101.13/bbbb/dao-2048:latest"
+                        },
+                        "runtime": "docker"
+                    },
+                    "@timestamp": "2021-08-18T11:04:19.651Z",
+                    "host": {
+                        "name": "filebeat-nrt2r"
+                    },
+                    "message": "172.29.19.0 - - [18/Aug/2021:11:04:19 +0000] \"GET / HTTP/1.1\" 200 4094 \"-\" \"curl/7.29.0\"",
+                    "kubernetes": {
+                        "namespace_uid": "0fd96b27-0a93-4f0f-a1c7-47cd38c66761",
+                        "namespace": "panguicai-dev-multicloudapp",
+                        "replicaset": {
+                            "name": "dao-2048-dao-2048-7945b8d44b"
+                        },
+                        "container": {
+                            "name": "dao-2048-dao-2048"
+                        },
+                        "labels": {
+                            "pod-template-hash": "7945b8d44b",
+                            "dce_daocloud_io/component": "dao-2048-dao-2048",
+                            "dce_daocloud_io/app": "dao-2048"
+                        },
+                        "node": {
+                            "hostname": "dce-10-23-5-4",
+                            "name": "dce-10-23-5-4",
+                            "labels": {
+                                "dx-insight_daocloud_io": "",
+                                "io_daocloud_dce_dns": "",
+                                "kubernetes_io/os": "linux",
+                                "kubernetes_io/hostname": "dce-10-23-5-4",
+                                "kubernetes_io/arch": "amd64",
+                                "infra": "elk",
+                                "zookeeper": "true",
+                                "beta_kubernetes_io/arch": "amd64",
+                                "elasticsearch": "true",
+                                "beta_kubernetes_io/os": "linux",
+                                "kafka": "true",
+                                "nginx": "true",
+                                "rocketmq": "true",
+                                "node_loadbalancer_dce_daocloud_io/lb01": "enabled",
+                                "node-role_kubernetes_io/infrastructure": "",
+                                "rabbitmq": "true"
+                            },
+                            "uid": "89b92445-6cfe-494e-8026-919af1a2628b"
+                        },
+                        "pod": {
+                            "name": "dao-2048-dao-2048-7945b8d44b-tmm2x",
+                            "ip": "172.29.80.15",
+                            "uid": "0634d55d-dfa8-4d12-a787-e0c717557a19"
+                        },
+                        "deployment": {
+                            "name": "dao-2048-dao-2048"
+                        }
+                    },
+                    "@version": "1"
+                },
+                "sort": [
+                    1629284659651
+                ]
+            }
+        ]
+    }
+}
+```
+
+
+
+
+
+```json
+```
+
+
+
+
+
+
+
 
 
 ```json

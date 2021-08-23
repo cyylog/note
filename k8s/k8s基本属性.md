@@ -20,3 +20,11 @@ kubernetes里的master指的是集群控制节点，在每个kubernetes集群里
 
 
 
+
+
+#### Service
+
+
+
+
+

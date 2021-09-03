@@ -6,7 +6,7 @@
 
 #### Service
 
-`Service`通过ClusterIP或者`NodePortIP`方式，生成IP规则，`Service`通过定义`SelectorLabels`来绑定对应`labels``的Pods`，创建`Service`时，还会创建一`个Endpoint`资源，后续对`Pod`的变动都是修改这个`Endpoint`资源（`Endpoint`就是`service`关联的`pod`的`ip`和`端口`）
+`Service`通过ClusterIP或者`NodePortIP`方式，生成IP规则，`Service`通过定义`SelectorLabels`来绑定对应`labels`的`Pods`，创建`Service`时，还会创建一`个Endpoint`资源，后续对`Pod`的变动都是修改这个`Endpoint`资源（`Endpoint`就是`service`关联的`pod`的`ip`和`端口`）
 
 
 

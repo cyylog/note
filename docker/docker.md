@@ -241,3 +241,89 @@ docker run --it --cpu-period=100000 --cpu-quota=20000 centos /bin/bash
 ```
 > 在每100ms的时间里，这个docker容器只能使用到20%的CPU带宽
 
+
+
+### 保存docker镜像和容器
+
+#### 保存docker镜像
+
+`docker save #ID or #Name`
+
+> docker save方法，会保存该镜像的所有历史记录
+>
+> docker save保存的是镜像(image)
+
+
+
+```shell
+docker save [oprions] images [images...]
+
+示例：
+docker save -o nginx.tar ngixn:latest
+或
+docker save > nginx.tar nginx:latest
+其中 -o 和 > 表示输出到文件，nginx.tar为目标文件，nginx:latest是源镜像名（name:tag）
+```
+
+
+
+#### 保存docker容器
+
+`docker export #ID or #Name`
+
+> docker export 方法不会保留历史记录，即没有commit历史
+>
+> docker export 保存的是容器（container）
+
+
+
+```shell
+docker export [options] container
+示例：
+docker export -o nginx-test.tar nginx-test
+# 导出为tar
+docker export #ID or #Name > /home/export.tar
+其中 -o 表示输出到文件，nginx-test.tar为目标文件，nginx-test是源容器名（name）
+```
+
+
+
+#### 载入镜像包
+
+`docker load`
+
+> docker load 用来载入镜像包
+>
+> docker load 不能对载入的镜像重命名
+
+```shell
+docker load [options]
+示例：
+docker load -i nginx.tar
+或
+docker load < nginx.tar
+其中 -i 和 < 表示从文件输入。会成功导入镜像及相关元数据，包括tag信息。
+```
+
+
+
+#### 载入容器包
+
+`docker import`
+
+> docker import 用来载入容器包，但是会恢复为镜像
+>
+> docker import 可以为镜像指定新名称
+
+
+
+```shell
+docker import [options] file|URL|- [REPOSITORY[:TAG]]
+示例：
+docker import nginx-test.tar nginx:imp
+或
+cat nginx-test.tar | docker import - nginx:imp
+```
+
+
+

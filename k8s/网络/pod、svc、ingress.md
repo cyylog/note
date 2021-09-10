@@ -16,8 +16,6 @@
 
 
 
-
-
 > Service一般用来提供不同node之间的访问，负载多Pod；
 >
-> Ingress先通过访问svc中的Endpoint绑定的Poddeip，用来提供对外开放服务。
+> Ingress先通过访问svc中的Endpoint绑定的Pod的ip，用来提供对外开放服务。

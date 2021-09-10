@@ -2,6 +2,14 @@
 
 
 
+#### kubernetes整体架构
+
+
+
+![img](https://img2018.cnblogs.com/blog/1465170/201904/1465170-20190403102521028-1937176408.png)
+
+
+
 #### Master
 
 kubernetes里的master指的是集群控制节点，在每个kubernetes集群里都需要有一个Master来负责整个集群的管理和控制，基本上kubernetes的所有控制命令都要发给它，它负责具体的执行过程。

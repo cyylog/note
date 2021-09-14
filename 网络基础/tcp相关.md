@@ -9,7 +9,7 @@
 
 ![image-20200517212158598](/Users/drzhang/Library/Application Support/typora-user-images/image-20200517212158598.png)
 
-#####第一次握手：
+##### 第一次握手：
 
 客户端发送**SYN=1,seq=x**到服务端
 
@@ -89,7 +89,6 @@
 503 | Service Unavailable | 由于超载或者系统维护，服务器暂时的无法处理客户端的请求。延时的长度可包含在服务器的Retry-After头信息中
 504 | Gateway Time-out | 充当网关或代理的服务器，未及时从远端服务器获取请求
 505 | HTTP Version not supported | 服务器不支持的HTTP协议的版本，无法完成处理
-
 
 
 

@@ -4,7 +4,7 @@
 
 
 
-![image-20210910141248037](/Users/zhang/drzhang/demo/note/k8s/image-20210910141248037.png)
+![image-20210910141248037](image-20210910141248037.png)
 
 
 
@@ -26,7 +26,7 @@
 
 
 
-<img src="/Users/zhang/drzhang/demo/note/k8s/image-20210910135901027.png" alt="image-20210910135901027" style="zoom: 200%;" />
+<img src="image-20210910135901027.png" alt="image-20210910135901027" style="zoom: 200%;" />
 
 
 
@@ -42,7 +42,7 @@
 
 
 
-![](/Users/zhang/drzhang/demo/note/k8s/image-20210914160450942.png)
+![](image-20210914160450942.png)
 
 
 

@@ -13,6 +13,40 @@ imagePullPolicy，用于设置镜像拉取策略，kubernetes支持配置三种�
 >   如果镜像tag为：latest（最终版本），默认策略是always
 
 
+#### 端口设置
+* name：端口名称，如果指定，必须保证name在pod中是唯一的
+* containerPort：容器要监听的端口
+* hostPort：容器要在主机上公开的端口，如果设置，主机上只能运行容器的一个副本（一般省略）
+* hostIP：要将外部端口绑定到的主机IP（一般省略）
+* protocol：端口协议。必须是UDP、TCP或SCTP。默认为TCP。
+
+
+#### 资源配额
+  容器中的程序要运行，肯定是要占用一定资源的，比如cpi和内存等，如果不对某个容器的资源做限制，那么它就可能吃掉大量资源，导致其他容器无法运行。针对这种情况，kubernetes提供了对内存和cpu的资源进行配额的机制，这种机制主要通过resources选项实现。
+* limit：用于限制运行时容器的最大占用资源，当容器占用资源超过limits时会被终止，并进行重启
+* requests：用于设置容器需要的最小资源，如果环境资源不够，容器将无法启动
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: pod-resources
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.7.1
+    resources:  # 资源配额
+      limits:   # 限制资源（上限）
+        cpu: "2"  # cpu限制，单位是core数
+        memory: "10Gi"  # 内存限制
+      requests:   # 请求资源（下限）
+        cpu: "1"    # cpu限制，但是为core数
+        memory: "10Mi"  # 内存限制
+```
+对cpu和memory单位说明：
+* cpu：core数，可以为整数或小数
+* memory：内存大小，可以使用Gi、Mi、G、M等形式
+
 
 #### 节点亲和性
 

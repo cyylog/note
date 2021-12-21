@@ -1,0 +1,187 @@
+
+### 添加hosts
+cat  >> /etc/hosts << EOF
+xxx master
+xxx node1
+xxx node2
+EOF
+
+### 修改hostname
+hostnamectl set-hostname 
+
+
+### 禁用防火墙
+systemctl stop firewalld
+systemctl disable firewalld
+
+### 禁用SEILINUX
+setenforce 0
+cat /etc/selinux/config
+> SELINUX=disabled
+
+modprobe br_netfilter
+
+
+cat >> /etc/sysctl.d/k8s.conf << EOF
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+net.ipv4.ip_forward = 1
+EOF
+
+
+sysctl -p /etc/sysctl.d/k8s.conf
+
+
+### 安装ipvs
+cat > /etc/sysconfig/modules/ipvs.modules <<EOF
+#!/bin/bash
+modprobe -- ip_vs
+modprobe -- ip_vs_rr
+modprobe -- ip_vs_wrr
+modprobe -- ip_vs_sh
+modprobe -- nf_conntrack_ipv4
+EOF
+
+chmod 755 /etc/sysconfig/modules/ipvs.modules && bash /etc/sysconfig/modules/ipvs.modules && lsmod | grep -e ip_vs -e nf_conntrack_ipv4
+
+
+### 安装ipset软件包
+yum install ipset
+
+### 安装ipvsadm
+yum install ipvsadm
+
+
+### 同步服务器时间
+yum install chrony -y
+systemctl enable chronyd && systemctl start chronyd
+chronyc sources
+date
+
+
+### 关闭swap分区
+swapoff -a
+
+
+### swappiness参数调整
+cat >> /etc/sysctl.d/k8s.conf <<  EOF
+vm.swappiness=0
+EOF
+
+sysctl -p /etc/sysctl.d/k8s.conf
+
+
+
+### 安装docker
+yum install -y yum-utils \
+  device-mapper-persistent-data \
+  lvm2
+
+yum-config-manager \
+    --add-repo \
+    https://download.docker.com/linux/centos/docker-ce.repo
+
+
+yum install docker-ce-19.03.1
+
+
+### 修改cgroup驱动
+mkdir -p /etc/docker
+
+cat >> /etc/docker/daemon.json << EOF
+{
+  "exec-opts": ["native.cgroupdriver=systemd"]
+}
+EOF
+
+### 启动docker
+systemctl start docker && systemctl enable docker
+
+
+### 指定yum源
+cat <<EOF > /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
+        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOF
+
+
+### 安装kubeadm、kubelet、kubectl
+yum install -y kubelet-1.20.1 kubeadm-1.20.1 kubectl-1.20.1 --disableexcludes=kubernetes
+
+
+### 设置开机启动
+systemctl enable --now kubelet
+
+
+### node节点操作
+kubeadm join xxx:6443 --token abcdef.0123456789abcdef \
+    --discovery-token-ca-cert-hash sha256:53bd6292356925d88eedd9cec17a171defe34636fe5f8d66e0ece667a2630849
+
+
+
+### master节点操作
+kubeadm config print init-defaults > kubeadm.yaml
+
+或者直接粘贴下面的yaml到kubeadm.yaml文件中
+```yaml
+apiVersion: kubeadm.k8s.io/v1beta2
+bootstrapTokens:
+- groups:
+  - system:bootstrappers:kubeadm:default-node-token
+  token: abcdef.0123456789abcdef
+  ttl: 24h0m0s
+  usages:
+  - signing
+  - authentication
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: xxx  # apiserver 节点内网IP
+  bindPort: 6443
+nodeRegistration:
+  criSocket: /var/run/dockershim.sock
+  name: master
+  taints:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/master
+---
+apiServer:
+  timeoutForControlPlane: 4m0s
+apiVersion: kubeadm.k8s.io/v1beta2
+certificatesDir: /etc/kubernetes/pki
+clusterName: kubernetes
+controllerManager: {}
+dns:
+  type: CoreDNS
+etcd:
+  local:
+    dataDir: /var/lib/etcd
+imageRepository: registry.aliyuncs.com/google_containers  # 修改成阿里云镜像源
+kind: ClusterConfiguration
+kubernetesVersion: v1.20.0
+networking:
+  dnsDomain: cluster.local
+  podSubnet: 10.244.0.0/16  # Pod 网段，flannel插件需要使用这个网段
+  serviceSubnet: 10.96.0.0/12
+scheduler: {}
+---
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+mode: ipvs  # kube-proxy 模式
+```
+
+
+### 对配置文件初始化
+kubeadm init --config kubeadm.yaml
+
+
+### 拷贝kubeconfig文件
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+

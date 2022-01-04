@@ -1,9 +1,12 @@
 HOSTNAME=$1
+master=$2
+node1=$3
+node2=$4
 
 cat  >> /etc/hosts << EOF
-xxx master
-xxx node1
-xxx node2
+$master master
+$node1 node1
+$node2 node2
 EOF
 
 hostnamectl set-hostname $HOSTNAME
